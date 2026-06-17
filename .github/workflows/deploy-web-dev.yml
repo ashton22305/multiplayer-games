@@ -1,11 +1,16 @@
-name: Deploy Web - dev
+name: Deploy - dev (main)
 
 on:
   push:
     branches: [main]
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   deploy:
+    needs: ci
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
     uses: ./.github/workflows/deploy-web.yml
     with:
       environment: dev

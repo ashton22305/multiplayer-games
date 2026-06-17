@@ -5,14 +5,18 @@ in later phases and are not covered here yet.
 
 ## How it works
 
-- **CI** (`.github/workflows/ci.yml`) runs on every push and pull request: typecheck, tests
-  (Vitest), and a production build.
-- **CD** uses a reusable workflow (`.github/workflows/deploy-web.yml`) called by two
-  environment-specific workflows:
-  - `deploy-web-dev.yml` — runs on push to `main`, deploys to the `dev` environment.
-  - `deploy-web-prod.yml` — runs on push to `prod`, deploys to the `prod` environment.
-- Each environment builds the SPA and `rsync`s `web/dist/` to the VM over SSH. Caddy serves the
-  files for that environment's subdomain with SPA history-mode fallback.
+- **CI** (`.github/workflows/ci.yml`) runs on pull requests and is reusable (`workflow_call`):
+  typecheck, tests (Vitest), and a production build.
+- **CD** is a per-branch pipeline that runs CI first, then deploys only if CI passed:
+  - `deploy-web-dev.yml` — on push to `main`: runs CI, then the `deploy` job (`needs: ci`) targets
+    the `dev` environment.
+  - `deploy-web-prod.yml` — on push to `prod`: runs CI, then deploys to the `prod` environment.
+  - Both delegate the actual deploy to the reusable `deploy-web.yml`, which builds the SPA and
+    `rsync`s `web/dist/` to the VM over SSH. Caddy serves each environment's subdomain with SPA
+    history-mode fallback.
+- The deploy job is gated on the repository variable `DEPLOY_ENABLED`. Until it equals `true`, the
+  deploy job is **skipped** (it does not run and does not report a false success). Set
+  `DEPLOY_ENABLED=true` once the VM, DNS, and environment secrets below are in place.
 
 `main` is the development line; promote a release by pushing/merging `main` into `prod`.
 
@@ -51,6 +55,8 @@ in later phases and are not covered here yet.
   - `DEPLOY_WEB_PATH` — web root for that env (`/var/www/arcade-dev` or `/var/www/arcade-prod`)
 - In each environment, set this variable:
   - `SITE_URL` — the environment's URL (e.g. `https://dev.<your-domain>`), shown on the deployment.
+- Set the repository variable `DEPLOY_ENABLED` to `true` to turn deploys on (Settings → Secrets and
+  variables → Actions → Variables). While unset, deploy jobs are skipped.
 
 Once configured: push to `main` deploys dev; push to `prod` deploys prod.
 
