@@ -1,0 +1,13 @@
+dev.example.com {
+	root * /var/www/arcade-dev
+	encode gzip zstd
+	try_files {path} /index.html
+	file_server
+}
+
+example.com {
+	root * /var/www/arcade-prod
+	encode gzip zstd
+	try_files {path} /index.html
+	file_server
+}
