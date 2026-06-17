@@ -5,9 +5,10 @@ import { RouterView } from 'vue-router'
 <template>
   <v-app>
     <v-app-bar flat>
-      <v-btn :to="{ name: 'home' }" variant="text" class="text-h6 text-none">Arcade</v-btn>
+      <v-btn :to="{ name: 'home' }" variant="text" class="text-h6 text-none">Home</v-btn>
+      <v-btn :to="{ name: 'games' }" variant="text" class="text-h6 text-none">Games</v-btn>
       <v-spacer />
-      <v-btn :to="{ name: 'home' }" variant="text">Games</v-btn>
+      <v-btn :href="'https://github.com/ashton22305/multiplayer-games'" target="_blank" variant="text" class="text-h6 text-none">Source</v-btn>
     </v-app-bar>
 
     <v-main>
@@ -17,7 +18,7 @@ import { RouterView } from 'vue-router'
     </v-main>
 
     <v-footer class="justify-center text-medium-emphasis">
-      Multiplayer Arcade - built with Vue and Rust/WASM
+      Multiplayer games built with Vue and Rust/WASM
     </v-footer>
   </v-app>
 </template>
