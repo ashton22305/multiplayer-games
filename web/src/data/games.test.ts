@@ -16,6 +16,11 @@ describe('games catalog', () => {
     expect(snake?.available).toBe(true)
   })
 
+  it('includes pacman as an available game', () => {
+    const pacman = games.find((g) => g.gameId === 'pacman')
+    expect(pacman?.available).toBe(true)
+  })
+
   it('gives every game a component loader', () => {
     for (const game of games) {
       expect(typeof game.component).toBe('function')

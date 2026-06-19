@@ -16,4 +16,11 @@ export const games: GameSummary[] = [
     available: true,
     component: () => import('@/components/SnakeGame.vue'),
   },
+  {
+    gameId: 'pacman',
+    title: 'Pac-Man',
+    description: 'Pac-Man remade by me.',
+    available: true,
+    component: () => import('@/components/PacmanGame.vue'),
+  }
 ]
