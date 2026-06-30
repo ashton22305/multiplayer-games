@@ -3,7 +3,6 @@ resolver = "2"
 members = [
     "crates/engine",
     "crates/protocol",
-    "crates/games/demo",
     "crates/games/snake",
     "crates/games/pacman",
 ]

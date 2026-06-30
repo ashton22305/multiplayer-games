@@ -69,14 +69,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "demo"
-version = "0.0.0"
-dependencies = [
- "engine",
- "macroquad",
-]
-
-[[package]]
 name = "embedded-io"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -93,7 +85,6 @@ name = "engine"
 version = "0.0.0"
 dependencies = [
  "macroquad",
- "postcard",
  "protocol",
  "serde_json",
 ]

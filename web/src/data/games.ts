@@ -15,7 +15,7 @@ export const games: GameSummary[] = [
     title: 'Snake',
     description: 'Classic multiplayer Snake. Last snake standing wins.',
     available: true,
-    instructions: 'Arrow keys / WASD or swipe to steer. Eat the food; avoid the walls and yourself.',
+    instructions: 'Arrow keys / WASD to steer. Eat the food; avoid the walls and yourself.',
   },
   {
     gameId: 'pacman',
@@ -23,6 +23,6 @@ export const games: GameSummary[] = [
     description: 'Pac-Man remade by me.',
     available: true,
     aspect: '19 / 21',
-    instructions: 'Arrow keys / WASD or swipe to move. Eat the pellets; grab a power pellet to turn the tables on the ghosts.',
+    instructions: 'Arrow keys / WASD to move. Eat the pellets; grab a power pellet to turn the tables on the ghosts.',
   },
 ]

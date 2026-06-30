@@ -7,13 +7,10 @@ const LOAD_TIMEOUT_MS = 15_000
 
 const props = withDefaults(
   defineProps<{
-    // Game id; resolves to the static iframe bundle at <gamesBase>/games/<game>/.
     game: string
-    // Human-readable game title used for the iframe accessibility label.
     title?: string
     width?: string
     height?: string
-    // CSS aspect-ratio used when no explicit height is given.
     aspect?: string
   }>(),
   { title: 'Game', width: '100%', height: '', aspect: '1 / 1' },
@@ -25,8 +22,6 @@ const isLoading = ref(true)
 const hasError = ref(false)
 let loadTimer: ReturnType<typeof setTimeout> | null = null
 
-// When VITE_GAMES_BASE_URL is set the games are served from a separate origin.
-// Falls back to same-origin so local dev and the Docker image work unchanged.
 const gamesBase = (import.meta.env.VITE_GAMES_BASE_URL ?? '').replace(/\/$/, '')
 let gamesOrigin = window.location.origin
 if (gamesBase) {
@@ -38,9 +33,8 @@ if (gamesBase) {
 }
 
 function gameSrc(game: string) {
-  const path = `${gamesBase}/games/${game}/index.html`
-  // Pass parent origin so host.js can postMessage back to the right target.
-  return `${path}?parent=${encodeURIComponent(window.location.origin)}`
+  const base = `${gamesBase}/games/_shared/index.html`
+  return `${base}?game=${game}&parent=${encodeURIComponent(window.location.origin)}`
 }
 
 function startLoadTimer() {
@@ -94,9 +88,6 @@ onMounted(() => {
   startLoadTimer()
 })
 
-// Reset loading state and restart the timeout when the game prop changes so
-// that navigating between games (same PlayView instance, different gameId) gets
-// a fresh spinner and error-detection window for each new iframe load.
 watch(
   () => props.game,
   () => {
@@ -106,21 +97,14 @@ watch(
     startLoadTimer()
   },
 )
-// The iframe is destroyed by Vue on unmount, which fully tears down the game's
-// wasm instance, WebGL context, and animation loop.
+
 onBeforeUnmount(() => {
   window.removeEventListener('message', onMessage)
   cancelLoadTimer()
 })
 
-// Send a command into the running game (e.g. pause/reset).
-// TODO(server): used by the future multiplayer UI; unverified end-to-end until
-// the Rust game server exists.
 function post(message: unknown) {
-  frame.value?.contentWindow?.postMessage(
-    { source: 'mq-host', message },
-    gamesOrigin,
-  )
+  frame.value?.contentWindow?.postMessage({ source: 'mq-host', message }, gamesOrigin)
 }
 defineExpose({ post })
 </script>
@@ -137,46 +121,23 @@ defineExpose({ post })
     <iframe
       ref="frame"
       :src="gameSrc(props.game)"
-      class="game-frame"
       :title="props.title"
+      style="width: 100%; height: 100%; border: none; display: block;"
     />
 
-    <div v-if="isLoading && !hasError" class="overlay overlay-loading">
+    <div
+      v-if="isLoading && !hasError"
+      style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: #000;"
+    >
       <v-progress-circular indeterminate color="primary" />
     </div>
 
-    <div v-if="hasError" class="overlay overlay-error">
+    <div
+      v-if="hasError"
+      style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #111;"
+    >
       <p class="text-medium-emphasis">Failed to load game.</p>
       <v-btn size="small" variant="tonal" @click="retry">Retry</v-btn>
     </div>
   </div>
 </template>
-
-<style scoped>
-.game-frame {
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
-  border-radius: 4px;
-}
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-}
-
-.overlay-loading {
-  background: #000;
-}
-
-.overlay-error {
-  flex-direction: column;
-  gap: 12px;
-  background: #111;
-}
-</style>
