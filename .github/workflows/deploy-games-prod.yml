@@ -1,0 +1,27 @@
+name: Deploy Games - prod
+
+on:
+  push:
+    branches: [prod]
+    paths:
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'web/scripts/build-games.mjs'
+      - 'web/public/games/_shared/**'
+      - '.github/workflows/deploy-games.yml'
+      - '.github/workflows/deploy-games-prod.yml'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: ci
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+    uses: ./.github/workflows/deploy-games.yml
+    with:
+      environment: prod
+    secrets: inherit

@@ -5,7 +5,7 @@
     text="That page does not exist."
   >
     <template #actions>
-      <v-btn :to="{ name: 'home' }" color="primary">Back to games</v-btn>
+      <v-btn :to="{ name: 'games' }" color="primary">Back to games</v-btn>
     </template>
   </v-empty-state>
 </template>

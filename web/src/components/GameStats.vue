@@ -1,5 +1,18 @@
 <script setup lang="ts">
-defineProps<{ gameId: string }>()
+import { computed } from 'vue'
+import { useGameStore } from '@/stores/game'
+
+const game = useGameStore()
+
+const statusLabel = computed(
+  () =>
+    ({
+      loading: 'Loading',
+      playing: 'Playing',
+      paused: 'Paused',
+      gameOver: 'Game over',
+    })[game.status] ?? game.status,
+)
 </script>
 
 <template>
@@ -7,14 +20,17 @@ defineProps<{ gameId: string }>()
     <v-card-title>Statistics</v-card-title>
     <v-card-text>
       <v-list density="compact" lines="one">
-        <v-list-item title="Games played">
-          <template #append>—</template>
+        <v-list-item title="Status">
+          <template #append>{{ statusLabel }}</template>
+        </v-list-item>
+        <v-list-item title="Score">
+          <template #append>{{ game.score }}</template>
         </v-list-item>
         <v-list-item title="High score">
-          <template #append>—</template>
+          <template #append>{{ game.highScore }}</template>
         </v-list-item>
         <v-list-item title="Players online">
-          <template #append>—</template>
+          <template #append>{{ game.playersOnline || '—' }}</template>
         </v-list-item>
       </v-list>
 

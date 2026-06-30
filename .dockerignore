@@ -1,0 +1,10 @@
+# Rust build artifacts — exclude before sending context to Docker daemon
+target/
+
+# Web build artifacts
+web/node_modules/
+web/dist/
+web/.vite/
+web/*.tsbuildinfo
+
+.git/

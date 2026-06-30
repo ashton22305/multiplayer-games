@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+
+const REPO_URL = 'https://github.com/ashton22305/multiplayer-games'
 </script>
 
 <template>
@@ -8,7 +10,7 @@ import { RouterView } from 'vue-router'
       <v-btn :to="{ name: 'home' }" variant="text" class="text-h6 text-none">Home</v-btn>
       <v-btn :to="{ name: 'games' }" variant="text" class="text-h6 text-none">Games</v-btn>
       <v-spacer />
-      <v-btn :href="'https://github.com/ashton22305/multiplayer-games'" target="_blank" variant="text" class="text-h6 text-none">Source</v-btn>
+      <v-btn :href="REPO_URL" target="_blank" variant="text" class="text-h6 text-none">Source</v-btn>
     </v-app-bar>
 
     <v-main>

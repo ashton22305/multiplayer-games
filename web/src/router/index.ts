@@ -17,6 +17,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/PlayView.vue'),
     props: true,
   },
+  // Engine demo: available in development only, not on public production routes.
+  ...(import.meta.env.DEV
+    ? [
+        {
+          path: '/demo',
+          name: 'demo',
+          component: () => import('@/views/DemoView.vue'),
+        } satisfies RouteRecordRaw,
+      ]
+    : []),
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',

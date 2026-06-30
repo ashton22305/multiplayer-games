@@ -3,6 +3,17 @@ name: Deploy - dev (main)
 on:
   push:
     branches: [main]
+    paths:
+      - 'web/**'
+      - '!web/scripts/build-games.mjs'
+      - '!web/public/games/_shared/**'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.github/workflows/deploy-web.yml'
+      - '.github/workflows/deploy-web-dev.yml'
+      - '.github/workflows/ci.yml'
 
 jobs:
   ci:
