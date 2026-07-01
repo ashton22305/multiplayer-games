@@ -32,3 +32,27 @@ jobs:
           name: web-dist
           path: web/dist
           if-no-files-found: error
+
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-ci-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-ci-
+
+      - run: cargo fmt --all -- --check
+
+      - run: cargo clippy --all-targets -- -D warnings
+
+      - run: cargo test

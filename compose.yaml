@@ -3,8 +3,8 @@ name: multiplayer-games
 services:
   web:
     build:
-      context: ./web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: web/Dockerfile
     image: multiplayer-games-web
     ports:
       - "8080:80"

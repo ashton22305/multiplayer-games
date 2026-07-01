@@ -1,0 +1,16 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/engine",
+    "crates/protocol",
+    "crates/games/snake",
+    "crates/games/pacman",
+]
+
+# Size-focused release profile for the wasm artifacts shipped to the browser.
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

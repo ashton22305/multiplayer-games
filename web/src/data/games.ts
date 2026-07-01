@@ -1,11 +1,12 @@
-import type { Component } from 'vue'
-
 export interface GameSummary {
   gameId: string
   title: string
   description: string
   available: boolean
-  component: () => Promise<{ default: Component }>
+  /** CSS aspect-ratio for the game iframe. Defaults to 1/1 when omitted. */
+  aspect?: string
+  /** Brief instructions shown below the game canvas on the play page. */
+  instructions: string
 }
 
 export const games: GameSummary[] = [
@@ -14,13 +15,14 @@ export const games: GameSummary[] = [
     title: 'Snake',
     description: 'Classic multiplayer Snake. Last snake standing wins.',
     available: true,
-    component: () => import('@/components/SnakeGame.vue'),
+    instructions: 'Arrow keys / WASD to steer. Eat the food; avoid the walls and yourself.',
   },
   {
     gameId: 'pacman',
     title: 'Pac-Man',
     description: 'Pac-Man remade by me.',
     available: true,
-    component: () => import('@/components/PacmanGame.vue'),
-  }
+    aspect: '19 / 21',
+    instructions: 'Arrow keys / WASD to move. Eat the pellets; grab a power pellet to turn the tables on the ghosts.',
+  },
 ]

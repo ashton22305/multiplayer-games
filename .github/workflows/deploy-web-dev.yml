@@ -3,6 +3,13 @@ name: Deploy - dev (main)
 on:
   push:
     branches: [main]
+    paths:
+      - 'web/**'
+      - '!web/scripts/build-games.mjs'
+      - '!web/public/games/_shared/**'
+      - '.github/workflows/deploy-web.yml'
+      - '.github/workflows/deploy-web-dev.yml'
+      - '.github/workflows/ci.yml'
 
 jobs:
   ci:

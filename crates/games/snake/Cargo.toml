@@ -1,0 +1,11 @@
+[package]
+name = "snake"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+engine = { path = "../../engine" }
+# Required directly because macroquad's `#[main]` proc-macro (used by
+# `engine::game_main!`) expands to unqualified `macroquad::...` paths.
+macroquad = "0.4"

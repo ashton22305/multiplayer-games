@@ -9,11 +9,14 @@ dist
 .DS_Store
 *.log
 
-<<<<<<< Updated upstream
 # wrangler files
 .wrangler
 .dev.vars*
 !.dev.vars.example
-=======
+
 .vscode
->>>>>>> Stashed changes
+
+# Generated per-game wasm bundles (built by web/scripts/build-games.mjs).
+# The vendored loader + host bridge in _shared/ stay committed.
+web/public/games/*
+!web/public/games/_shared/

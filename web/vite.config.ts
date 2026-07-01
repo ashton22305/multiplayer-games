@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -19,11 +20,14 @@ export default defineConfig({
       '/ws': {
         target: 'ws://localhost:8080',
         ws: true,
-      }
+      },
     },
   },
   build: {
     outDir: 'dist',
     sourcemap: false,
+  },
+  test: {
+    environment: 'jsdom',
   },
 })

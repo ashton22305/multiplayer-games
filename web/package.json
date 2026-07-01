@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "build:games": "node scripts/build-games.mjs",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@types/node": "^22.10.0",
     "@vitejs/plugin-vue": "^6.0.0",
+    "jsdom": "^29.1.1",
     "typescript": "~5.7.2",
     "vite": "^7.0.0",
     "vite-plugin-vuetify": "^2.1.3",

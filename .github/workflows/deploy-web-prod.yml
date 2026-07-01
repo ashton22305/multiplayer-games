@@ -3,6 +3,13 @@ name: Deploy - prod
 on:
   push:
     branches: [prod]
+    paths:
+      - 'web/**'
+      - '!web/scripts/build-games.mjs'
+      - '!web/public/games/_shared/**'
+      - '.github/workflows/deploy-web.yml'
+      - '.github/workflows/deploy-web-prod.yml'
+      - '.github/workflows/ci.yml'
 
 jobs:
   ci:

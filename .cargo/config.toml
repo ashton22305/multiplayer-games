@@ -1,0 +1,5 @@
+# miniquad's JS-provided functions (sapp_*, fs_*) are wasm imports resolved at
+# runtime by mq_js_bundle.js. Modern wasm-ld errors on these undefined symbols
+# unless told to import them.
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "link-arg=--allow-undefined"]
