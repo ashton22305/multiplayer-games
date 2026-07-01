@@ -1,6 +1,6 @@
 use engine::macroquad::prelude::*;
 use engine::macroquad::rand;
-use engine::protocol::{GameStatus, HostEvent};
+use engine::protocol::HostEvent;
 use engine::{
     direction_delta, host, Action, Collider, Context, Direction, EntityId, Game, GameConfig, Gfx,
     TileActor,
@@ -41,15 +41,6 @@ fn is_wall(t: IVec2) -> bool {
 
 fn tile_center(t: IVec2) -> Vec2 {
     vec2(t.x as f32 * CELL + CELL * 0.5, t.y as f32 * CELL + CELL * 0.5)
-}
-
-fn opposite(d: Direction) -> Direction {
-    match d {
-        Direction::Up => Direction::Down,
-        Direction::Down => Direction::Up,
-        Direction::Left => Direction::Right,
-        Direction::Right => Direction::Left,
-    }
 }
 
 enum Phase {
@@ -121,7 +112,7 @@ impl Pacman {
 
     fn restart(&mut self) {
         *self = Pacman::fresh();
-        host::emit(&HostEvent::StatusChanged { status: GameStatus::Playing });
+        host::emit_playing();
         host::emit(&HostEvent::ScoreChanged { score: 0 });
     }
 
@@ -140,7 +131,7 @@ impl Pacman {
 
     fn ghost_ai(&self, g: &TileActor, frightened: bool) -> Option<Direction> {
         let tile = g.tile();
-        let reverse = g.dir.map(opposite);
+        let reverse = g.dir.map(Direction::opposite);
         let target = self.pac.pos;
         let mut best = None;
         let mut best_metric = if frightened { f32::MIN } else { f32::MAX };
@@ -176,7 +167,7 @@ impl Game for Pacman {
     async fn load() -> Self {
         rand::srand(macroquad::miniquad::date::now() as u64);
         host::emit(&HostEvent::Ready);
-        host::emit(&HostEvent::StatusChanged { status: GameStatus::Playing });
+        host::emit_playing();
         Pacman::fresh()
     }
 
@@ -239,8 +230,7 @@ impl Game for Pacman {
 
         if self.remaining == 0 {
             self.phase = Phase::Won;
-            host::emit(&HostEvent::GameOver { score: self.score });
-            host::emit(&HostEvent::StatusChanged { status: GameStatus::GameOver });
+            host::emit_game_over(self.score);
         }
     }
 
@@ -262,8 +252,7 @@ impl Game for Pacman {
             self.lives = self.lives.saturating_sub(1);
             if self.lives == 0 {
                 self.phase = Phase::Lost;
-                host::emit(&HostEvent::GameOver { score: self.score });
-                host::emit(&HostEvent::StatusChanged { status: GameStatus::GameOver });
+                host::emit_game_over(self.score);
             } else {
                 self.reset_positions();
             }

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM node:22-slim AS build
 
 RUN apt-get update \
@@ -15,7 +16,8 @@ WORKDIR /repo
 COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 COPY .cargo/ .cargo/
 COPY crates/ crates/
-RUN cargo fetch --locked
+RUN --mount=type=cache,target=/root/.cargo/registry \
+    cargo fetch --locked
 
 # Node dependencies
 COPY web/package.json web/package-lock.json web/
@@ -25,7 +27,9 @@ RUN cd web && npm ci
 COPY web/ web/
 
 # Compile wasm game bundles then build the Vue SPA
-RUN cd web && npm run build:games && npm run build
+RUN --mount=type=cache,target=/root/.cargo/registry \
+    --mount=type=cache,target=/repo/target \
+    cd web && npm run build:games && npm run build
 
 FROM nginx:alpine AS runtime
 COPY web/nginx.conf /etc/nginx/conf.d/default.conf

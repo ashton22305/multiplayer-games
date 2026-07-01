@@ -5,9 +5,13 @@
 //   node scripts/build-games.mjs                      # build all crates under crates/games
 //   node scripts/build-games.mjs snake                # build only the named game(s)
 //   node scripts/build-games.mjs --out games-dist     # write to a custom dir
-import { execFileSync, copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
+import { execFile, execFileSync } from 'node:child_process'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { promisify } from 'node:util'
+
+const execFileAsync = promisify(execFile)
 
 const here = dirname(fileURLToPath(import.meta.url))
 const webDir = resolve(here, '..')
@@ -59,20 +63,22 @@ execFileSync(
 const optimize = hasWasmOpt()
 if (!optimize) console.log('build-games: wasm-opt not found, shipping unoptimized wasm')
 
-for (const name of games) {
-  const wasmIn = join(releaseDir, `${name}.wasm`)
-  if (!existsSync(wasmIn)) throw new Error(`build-games: expected ${wasmIn} after cargo build`)
+await Promise.all(
+  games.map(async (name) => {
+    const wasmIn = join(releaseDir, `${name}.wasm`)
+    if (!existsSync(wasmIn)) throw new Error(`build-games: expected ${wasmIn} after cargo build`)
 
-  const outDir = join(outBase, name)
-  mkdirSync(outDir, { recursive: true })
-  const wasmOut = join(outDir, `${name}.wasm`)
+    const outDir = join(outBase, name)
+    mkdirSync(outDir, { recursive: true })
+    const wasmOut = join(outDir, `${name}.wasm`)
 
-  if (optimize) {
-    execFileSync('wasm-opt', ['-Oz', wasmIn, '-o', wasmOut], { stdio: 'inherit' })
-  } else {
-    copyFileSync(wasmIn, wasmOut)
-  }
+    if (optimize) {
+      await execFileAsync('wasm-opt', ['-Oz', wasmIn, '-o', wasmOut])
+    } else {
+      copyFileSync(wasmIn, wasmOut)
+    }
 
-  const kb = (statSync(wasmOut).size / 1024).toFixed(0)
-  console.log(`  ${name}: ${kb} KB -> ${outDir}`)
-}
+    const kb = (statSync(wasmOut).size / 1024).toFixed(0)
+    console.log(`  ${name}: ${kb} KB -> ${outDir}`)
+  }),
+)

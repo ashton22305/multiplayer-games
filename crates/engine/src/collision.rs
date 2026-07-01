@@ -45,6 +45,25 @@ fn layers_match(a: &Collider, b: &Collider) -> bool {
     (a.mask & b.layer) != 0 || (b.mask & a.layer) != 0
 }
 
+/// Which edges of `bounds` the given box extends past, if any.
+fn crossed_sides(bounds: Rect, aabb: Rect) -> impl Iterator<Item = Side> {
+    [
+        (aabb.x < bounds.x, Side::Left),
+        (aabb.x + aabb.w > bounds.x + bounds.w, Side::Right),
+        (aabb.y < bounds.y, Side::Top),
+        (aabb.y + aabb.h > bounds.y + bounds.h, Side::Bottom),
+    ]
+    .into_iter()
+    .filter_map(|(crossed, side)| crossed.then_some(side))
+}
+
+/// Whether a box extends past any edge of `bounds`. Usable outside a
+/// `CollisionWorld` for games that need an immediate, synchronous answer
+/// (e.g. a grid game deciding mid-tick whether a move is still in bounds).
+pub fn out_of_bounds(bounds: Rect, aabb: Rect) -> bool {
+    crossed_sides(bounds, aabb).next().is_some()
+}
+
 pub struct CollisionWorld {
     bounds: Rect,
     colliders: Vec<Collider>,
@@ -75,26 +94,11 @@ impl CollisionWorld {
     }
 
     pub fn for_each_boundary(&self, mut f: impl FnMut(EntityId, Side)) {
-        let b = self.bounds;
         for c in &self.colliders {
-            let bb = c.aabb();
-            if bb.x < b.x { f(c.id, Side::Left); }
-            if bb.x + bb.w > b.x + b.w { f(c.id, Side::Right); }
-            if bb.y < b.y { f(c.id, Side::Top); }
-            if bb.y + bb.h > b.y + b.h { f(c.id, Side::Bottom); }
+            for side in crossed_sides(self.bounds, c.aabb()) {
+                f(c.id, side);
+            }
         }
-    }
-
-    pub fn collisions(&self) -> Vec<(EntityId, EntityId)> {
-        let mut out = Vec::new();
-        self.for_each_collision(|a, b| out.push((a, b)));
-        out
-    }
-
-    pub fn boundary_crossings(&self) -> Vec<(EntityId, Side)> {
-        let mut out = Vec::new();
-        self.for_each_boundary(|id, side| out.push((id, side)));
-        out
     }
 }
 
@@ -121,7 +125,9 @@ mod tests {
         let mut w = CollisionWorld::new(Rect::new(-100.0, -100.0, 200.0, 200.0));
         w.add(rect(0, 0.0, 0.0, 20.0, 20.0).with_layers(0b01, 0b10));
         w.add(rect(1, 5.0, 0.0, 20.0, 20.0).with_layers(0b01, 0b10));
-        assert!(w.collisions().is_empty());
+        let mut collisions = Vec::new();
+        w.for_each_collision(|a, b| collisions.push((a, b)));
+        assert!(collisions.is_empty());
     }
 
     #[test]
@@ -129,25 +135,8 @@ mod tests {
         let mut w = CollisionWorld::new(Rect::new(0.0, 0.0, 100.0, 100.0));
         // pos (2, 50), width 10 → aabb.x = -3, crosses left boundary
         w.add(rect(0, 2.0, 50.0, 10.0, 10.0));
-        let crossings = w.boundary_crossings();
+        let mut crossings = Vec::new();
+        w.for_each_boundary(|id, side| crossings.push((id, side)));
         assert_eq!(crossings, vec![(EntityId(0), Side::Left)]);
-    }
-
-    #[test]
-    fn callback_and_vec_apis_agree() {
-        let mut w = CollisionWorld::new(Rect::new(0.0, 0.0, 100.0, 100.0));
-        w.add(rect(0, 10.0, 10.0, 16.0, 16.0));
-        w.add(rect(1, 15.0, 10.0, 16.0, 16.0));
-        w.add(rect(2, 2.0, 50.0, 10.0, 10.0));
-
-        let vec_collisions = w.collisions();
-        let mut cb_collisions = Vec::new();
-        w.for_each_collision(|a, b| cb_collisions.push((a, b)));
-        assert_eq!(vec_collisions, cb_collisions);
-
-        let vec_crossings = w.boundary_crossings();
-        let mut cb_crossings = Vec::new();
-        w.for_each_boundary(|id, side| cb_crossings.push((id, side)));
-        assert_eq!(vec_crossings, cb_crossings);
     }
 }

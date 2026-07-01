@@ -1,22 +1,12 @@
 use engine::macroquad::prelude::*;
 use engine::macroquad::rand;
-use engine::protocol::{GameStatus, HostEvent};
-use engine::{direction_delta, host, Action, Context, Direction, Game, GameConfig, Gfx};
+use engine::protocol::HostEvent;
+use engine::{direction_delta, host, out_of_bounds, Action, Context, Direction, Game, GameConfig, Gfx};
 
 const GRID: i32 = 20;
 const CELL: f32 = 40.0;
 const WORLD: f32 = GRID as f32 * CELL;
 const TICK: f32 = 0.12;
-
-fn opposite(a: Direction, b: Direction) -> bool {
-    matches!(
-        (a, b),
-        (Direction::Up, Direction::Down)
-            | (Direction::Down, Direction::Up)
-            | (Direction::Left, Direction::Right)
-            | (Direction::Right, Direction::Left)
-    )
-}
 
 enum Phase {
     Playing,
@@ -51,27 +41,26 @@ impl Snake {
 
     fn restart(&mut self) {
         *self = Snake::fresh();
-        host::emit(&HostEvent::StatusChanged { status: GameStatus::Playing });
+        host::emit_playing();
         host::emit(&HostEvent::ScoreChanged { score: 0 });
     }
 
     fn die(&mut self) {
         self.phase = Phase::Dead;
-        host::emit(&HostEvent::GameOver { score: self.score });
-        host::emit(&HostEvent::StatusChanged { status: GameStatus::GameOver });
+        host::emit_game_over(self.score);
     }
 
     fn win(&mut self) {
         self.phase = Phase::Won;
-        host::emit(&HostEvent::GameOver { score: self.score });
-        host::emit(&HostEvent::StatusChanged { status: GameStatus::GameOver });
+        host::emit_game_over(self.score);
     }
 
     fn step(&mut self) {
         self.dir = self.next_dir;
         let head = self.body[0] + direction_delta(self.dir);
 
-        if head.x < 0 || head.y < 0 || head.x >= GRID || head.y >= GRID {
+        let (hx, hy, hw, hh) = cell_rect(head, 0.0);
+        if out_of_bounds(Rect::new(0.0, 0.0, WORLD, WORLD), Rect::new(hx, hy, hw, hh)) {
             self.die();
             return;
         }
@@ -130,7 +119,7 @@ impl Game for Snake {
     async fn load() -> Self {
         rand::srand(macroquad::miniquad::date::now() as u64);
         host::emit(&HostEvent::Ready);
-        host::emit(&HostEvent::StatusChanged { status: GameStatus::Playing });
+        host::emit_playing();
         Snake::fresh()
     }
 
@@ -138,7 +127,7 @@ impl Game for Snake {
         match self.phase {
             Phase::Playing => {
                 if let Some(d) = ctx.input.direction() {
-                    if !opposite(d, self.dir) {
+                    if d != self.dir.opposite() {
                         self.next_dir = d;
                     }
                 }
@@ -173,31 +162,17 @@ impl Game for Snake {
         }
 
         match self.phase {
-            Phase::Dead => {
-                gfx.rect(0.0, 0.0, WORLD, WORLD, Color::new(0.0, 0.0, 0.0, 0.55));
-                gfx.text_centered("Game Over", WORLD * 0.5, WORLD * 0.5 - 10.0, 64.0, WHITE);
-                gfx.text_centered(
-                    "Press Enter to restart",
-                    WORLD * 0.5,
-                    WORLD * 0.5 + 40.0,
-                    32.0,
-                    Color::new(0.8, 0.8, 0.8, 1.0),
-                );
-            }
-            Phase::Won => {
-                gfx.rect(0.0, 0.0, WORLD, WORLD, Color::new(0.0, 0.0, 0.0, 0.55));
-                gfx.text_centered("You Win!", WORLD * 0.5, WORLD * 0.5 - 10.0, 64.0, WHITE);
-                gfx.text_centered(
-                    "Press Enter to play again",
-                    WORLD * 0.5,
-                    WORLD * 0.5 + 40.0,
-                    32.0,
-                    Color::new(0.8, 0.8, 0.8, 1.0),
-                );
-            }
+            Phase::Dead => overlay(gfx, "Game Over", "Press Enter to restart"),
+            Phase::Won => overlay(gfx, "You Win!", "Press Enter to play again"),
             Phase::Playing => {}
         }
     }
+}
+
+fn overlay(gfx: &Gfx, title: &str, sub: &str) {
+    gfx.rect(0.0, 0.0, WORLD, WORLD, Color::new(0.0, 0.0, 0.0, 0.55));
+    gfx.text_centered(title, WORLD * 0.5, WORLD * 0.5 - 10.0, 64.0, WHITE);
+    gfx.text_centered(sub, WORLD * 0.5, WORLD * 0.5 + 40.0, 32.0, Color::new(0.8, 0.8, 0.8, 1.0));
 }
 
 engine::game_main!(Snake);

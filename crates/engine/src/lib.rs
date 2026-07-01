@@ -6,7 +6,7 @@ pub mod input;
 pub mod movement;
 pub mod types;
 
-pub use collision::{Collider, CollisionWorld, Side};
+pub use collision::{out_of_bounds, Collider, CollisionWorld, Side};
 pub use gfx::Gfx;
 pub use input::{direction_delta, Action, Direction, Input};
 pub use movement::TileActor;

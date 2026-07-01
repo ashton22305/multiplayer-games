@@ -9,6 +9,18 @@ pub enum Direction {
     Right,
 }
 
+impl Direction {
+    /// The reverse of this direction.
+    pub fn opposite(self) -> Direction {
+        match self {
+            Direction::Up => Direction::Down,
+            Direction::Down => Direction::Up,
+            Direction::Left => Direction::Right,
+            Direction::Right => Direction::Left,
+        }
+    }
+}
+
 /// Returns the unit grid step for a direction.
 pub fn direction_delta(d: Direction) -> IVec2 {
     match d {
@@ -44,28 +56,23 @@ impl Input {
     }
 
     pub fn is_down(&self, action: Action) -> bool {
-        use KeyCode::*;
-        match action {
-            Action::Up => is_key_down(Up) || is_key_down(W),
-            Action::Down => is_key_down(Down) || is_key_down(S),
-            Action::Left => is_key_down(Left) || is_key_down(A),
-            Action::Right => is_key_down(Right) || is_key_down(D),
-            Action::Confirm => is_key_down(Enter) || is_key_down(Space),
-            Action::Cancel => is_key_down(Escape),
-            Action::Pause => is_key_down(P),
-        }
+        Self::check(action, is_key_down)
     }
 
     pub fn is_pressed(&self, action: Action) -> bool {
+        Self::check(action, is_key_pressed)
+    }
+
+    fn check(action: Action, key_state: impl Fn(KeyCode) -> bool) -> bool {
         use KeyCode::*;
         match action {
-            Action::Up => is_key_pressed(Up) || is_key_pressed(W),
-            Action::Down => is_key_pressed(Down) || is_key_pressed(S),
-            Action::Left => is_key_pressed(Left) || is_key_pressed(A),
-            Action::Right => is_key_pressed(Right) || is_key_pressed(D),
-            Action::Confirm => is_key_pressed(Enter) || is_key_pressed(Space),
-            Action::Cancel => is_key_pressed(Escape),
-            Action::Pause => is_key_pressed(P),
+            Action::Up => key_state(Up) || key_state(W),
+            Action::Down => key_state(Down) || key_state(S),
+            Action::Left => key_state(Left) || key_state(A),
+            Action::Right => key_state(Right) || key_state(D),
+            Action::Confirm => key_state(Enter) || key_state(Space),
+            Action::Cancel => key_state(Escape),
+            Action::Pause => key_state(P),
         }
     }
 

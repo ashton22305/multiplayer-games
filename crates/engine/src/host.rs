@@ -1,4 +1,4 @@
-use protocol::HostEvent;
+use protocol::{GameStatus, HostEvent};
 
 #[cfg(target_arch = "wasm32")]
 extern "C" {
@@ -21,3 +21,14 @@ pub fn emit(event: &HostEvent) {
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn emit(_: &HostEvent) {}
+
+/// Announce that the game (re)started and is now playing.
+pub fn emit_playing() {
+    emit(&HostEvent::StatusChanged { status: GameStatus::Playing });
+}
+
+/// Announce that the game ended with the given score.
+pub fn emit_game_over(score: u32) {
+    emit(&HostEvent::GameOver { score });
+    emit(&HostEvent::StatusChanged { status: GameStatus::GameOver });
+}
