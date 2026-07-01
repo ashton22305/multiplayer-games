@@ -40,7 +40,10 @@ fn is_wall(t: IVec2) -> bool {
 }
 
 fn tile_center(t: IVec2) -> Vec2 {
-    vec2(t.x as f32 * CELL + CELL * 0.5, t.y as f32 * CELL + CELL * 0.5)
+    vec2(
+        t.x as f32 * CELL + CELL * 0.5,
+        t.y as f32 * CELL + CELL * 0.5,
+    )
 }
 
 enum Phase {
@@ -84,7 +87,10 @@ impl Pacman {
         }
         let mut game = Self {
             pac: TileActor::new(PAC_START, CELL, PAC_SPEED),
-            ghosts: GHOST_STARTS.iter().map(|&t| TileActor::new(t, CELL, GHOST_SPEED)).collect(),
+            ghosts: GHOST_STARTS
+                .iter()
+                .map(|&t| TileActor::new(t, CELL, GHOST_SPEED))
+                .collect(),
             cells,
             remaining,
             score: 0,
@@ -144,7 +150,11 @@ impl Pacman {
                 continue;
             }
             let dist = tile_center(nt).distance_squared(target);
-            let better = if frightened { dist > best_metric } else { dist < best_metric };
+            let better = if frightened {
+                dist > best_metric
+            } else {
+                dist < best_metric
+            };
             if better {
                 best_metric = dist;
                 best = Some(d);
@@ -275,8 +285,20 @@ impl Game for Pacman {
                 let t = ivec2(x, y);
                 let c = tile_center(t);
                 match self.cell(t) {
-                    1 => gfx.rect(c.x - 3.0, c.y - 3.0, 6.0, 6.0, Color::new(1.0, 0.85, 0.6, 1.0)),
-                    2 => gfx.rect(c.x - 7.0, c.y - 7.0, 14.0, 14.0, Color::new(1.0, 0.9, 0.4, 1.0)),
+                    1 => gfx.rect(
+                        c.x - 3.0,
+                        c.y - 3.0,
+                        6.0,
+                        6.0,
+                        Color::new(1.0, 0.85, 0.6, 1.0),
+                    ),
+                    2 => gfx.rect(
+                        c.x - 7.0,
+                        c.y - 7.0,
+                        14.0,
+                        14.0,
+                        Color::new(1.0, 0.9, 0.4, 1.0),
+                    ),
                     _ => {}
                 }
             }
@@ -299,9 +321,21 @@ impl Game for Pacman {
         }
 
         let pr = CELL * 0.42;
-        gfx.rect(self.pac.pos.x - pr, self.pac.pos.y - pr, pr * 2.0, pr * 2.0, YELLOW);
+        gfx.rect(
+            self.pac.pos.x - pr,
+            self.pac.pos.y - pr,
+            pr * 2.0,
+            pr * 2.0,
+            YELLOW,
+        );
 
-        gfx.text(&format!("Lives: {}", self.lives), 10.0, WORLD_H - 8.0, 28.0, WHITE);
+        gfx.text(
+            &format!("Lives: {}", self.lives),
+            10.0,
+            WORLD_H - 8.0,
+            28.0,
+            WHITE,
+        );
 
         match self.phase {
             Phase::Lost => overlay(gfx, "Game Over", "Press Enter to restart"),
@@ -314,7 +348,13 @@ impl Game for Pacman {
 fn overlay(gfx: &Gfx, title: &str, sub: &str) {
     gfx.rect(0.0, 0.0, WORLD_W, WORLD_H, Color::new(0.0, 0.0, 0.0, 0.6));
     gfx.text_centered(title, WORLD_W * 0.5, WORLD_H * 0.5 - 10.0, 56.0, WHITE);
-    gfx.text_centered(sub, WORLD_W * 0.5, WORLD_H * 0.5 + 36.0, 26.0, Color::new(0.85, 0.85, 0.85, 1.0));
+    gfx.text_centered(
+        sub,
+        WORLD_W * 0.5,
+        WORLD_H * 0.5 + 36.0,
+        26.0,
+        Color::new(0.85, 0.85, 0.85, 1.0),
+    );
 }
 
 engine::game_main!(Pacman);

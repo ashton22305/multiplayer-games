@@ -5,7 +5,11 @@ fn ser<T: serde::Serialize>(v: &T) -> Value {
     serde_json::to_value(v).unwrap()
 }
 
-fn round_trip<T: serde::Serialize + for<'de> serde::Deserialize<'de> + PartialEq + std::fmt::Debug>(v: T) {
+fn round_trip<
+    T: serde::Serialize + for<'de> serde::Deserialize<'de> + PartialEq + std::fmt::Debug,
+>(
+    v: T,
+) {
     let json = serde_json::to_string(&v).unwrap();
     let back: T = serde_json::from_str(&json).unwrap();
     assert_eq!(v, back);
@@ -21,7 +25,12 @@ fn game_status_serializes_to_camel_case() {
 
 #[test]
 fn game_status_round_trips() {
-    for v in [GameStatus::Loading, GameStatus::Playing, GameStatus::Paused, GameStatus::GameOver] {
+    for v in [
+        GameStatus::Loading,
+        GameStatus::Playing,
+        GameStatus::Paused,
+        GameStatus::GameOver,
+    ] {
         round_trip(v);
     }
 }
@@ -50,7 +59,9 @@ fn host_event_game_over() {
 #[test]
 fn host_event_status_changed() {
     assert_eq!(
-        ser(&HostEvent::StatusChanged { status: GameStatus::Playing }),
+        ser(&HostEvent::StatusChanged {
+            status: GameStatus::Playing
+        }),
         json!({ "type": "statusChanged", "status": "playing" }),
     );
 }
@@ -69,7 +80,9 @@ fn host_event_round_trips() {
         HostEvent::Ready,
         HostEvent::ScoreChanged { score: 0 },
         HostEvent::GameOver { score: 100 },
-        HostEvent::StatusChanged { status: GameStatus::Paused },
+        HostEvent::StatusChanged {
+            status: GameStatus::Paused,
+        },
         HostEvent::PlayersOnline { count: 1 },
     ] {
         round_trip(v);

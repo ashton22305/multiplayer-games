@@ -6,7 +6,9 @@ pub struct Gfx {
 
 impl Gfx {
     pub fn new(world_width: f32, world_height: f32) -> Self {
-        Self { world: vec2(world_width, world_height) }
+        Self {
+            world: vec2(world_width, world_height),
+        }
     }
 
     pub fn bounds(&self) -> Rect {
@@ -36,7 +38,11 @@ impl Gfx {
             pos.x,
             pos.y,
             WHITE,
-            DrawTextureParams { dest_size: Some(size), rotation, ..Default::default() },
+            DrawTextureParams {
+                dest_size: Some(size),
+                rotation,
+                ..Default::default()
+            },
         );
     }
 

@@ -22,7 +22,14 @@ pub struct Collider {
 
 impl Collider {
     pub fn new(id: EntityId, pos: Vec2, width: f32, height: f32) -> Self {
-        Self { id, pos, width, height, layer: 1, mask: u32::MAX }
+        Self {
+            id,
+            pos,
+            width,
+            height,
+            layer: 1,
+            mask: u32::MAX,
+        }
     }
 
     pub fn with_layers(mut self, layer: u32, mask: u32) -> Self {
@@ -71,7 +78,10 @@ pub struct CollisionWorld {
 
 impl CollisionWorld {
     pub fn new(bounds: Rect) -> Self {
-        Self { bounds, colliders: Vec::new() }
+        Self {
+            bounds,
+            colliders: Vec::new(),
+        }
     }
 
     pub fn clear(&mut self) {

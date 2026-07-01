@@ -24,11 +24,15 @@ pub fn emit(_: &HostEvent) {}
 
 /// Announce that the game (re)started and is now playing.
 pub fn emit_playing() {
-    emit(&HostEvent::StatusChanged { status: GameStatus::Playing });
+    emit(&HostEvent::StatusChanged {
+        status: GameStatus::Playing,
+    });
 }
 
 /// Announce that the game ended with the given score.
 pub fn emit_game_over(score: u32) {
     emit(&HostEvent::GameOver { score });
-    emit(&HostEvent::StatusChanged { status: GameStatus::GameOver });
+    emit(&HostEvent::StatusChanged {
+        status: GameStatus::GameOver,
+    });
 }

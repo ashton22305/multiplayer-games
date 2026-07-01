@@ -1,7 +1,9 @@
 use engine::macroquad::prelude::*;
 use engine::macroquad::rand;
 use engine::protocol::HostEvent;
-use engine::{direction_delta, host, out_of_bounds, Action, Context, Direction, Game, GameConfig, Gfx};
+use engine::{
+    direction_delta, host, out_of_bounds, Action, Context, Direction, Game, GameConfig, Gfx,
+};
 
 const GRID: i32 = 20;
 const CELL: f32 = 40.0;
@@ -66,7 +68,11 @@ impl Snake {
         }
 
         let will_grow = self.food == Some(head);
-        let occupied = if will_grow { &self.body[..] } else { &self.body[..self.body.len() - 1] };
+        let occupied = if will_grow {
+            &self.body[..]
+        } else {
+            &self.body[..self.body.len() - 1]
+        };
         if occupied.contains(&head) {
             self.die();
             return;
@@ -94,7 +100,9 @@ fn random_empty(body: &[IVec2]) -> Option<IVec2> {
         .flat_map(|y| (0..GRID).map(move |x| ivec2(x, y)))
         .filter(|c| !body.contains(c))
         .collect();
-    empties.get(rand::gen_range(0, empties.len().max(1))).copied()
+    empties
+        .get(rand::gen_range(0, empties.len().max(1)))
+        .copied()
 }
 
 fn cell_rect(c: IVec2, inset: f32) -> (f32, f32, f32, f32) {
@@ -172,7 +180,13 @@ impl Game for Snake {
 fn overlay(gfx: &Gfx, title: &str, sub: &str) {
     gfx.rect(0.0, 0.0, WORLD, WORLD, Color::new(0.0, 0.0, 0.0, 0.55));
     gfx.text_centered(title, WORLD * 0.5, WORLD * 0.5 - 10.0, 64.0, WHITE);
-    gfx.text_centered(sub, WORLD * 0.5, WORLD * 0.5 + 40.0, 32.0, Color::new(0.8, 0.8, 0.8, 1.0));
+    gfx.text_centered(
+        sub,
+        WORLD * 0.5,
+        WORLD * 0.5 + 40.0,
+        32.0,
+        Color::new(0.8, 0.8, 0.8, 1.0),
+    );
 }
 
 engine::game_main!(Snake);
